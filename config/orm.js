@@ -1,17 +1,30 @@
 var connection = require("../config/connection");
 
-connection.connect(function (err) {
-    if (err) {
-        console.error("error connecting: " + err.stack);
-        return;
-    }
-    console.log("connected as id " + connection.threadId);
-});
+var orm = {
 
-selectAll();
+selectAll: function(table, cb) {
+    var queryString = "SELECT * FROM ??";
+    connection.query(queryString, [table], function(err,res) {
+        if (err) throw err;
+        cb(res);
 
-insertOne();
+    });
+},
 
-updateOne();
+insertOne: function(burgerName, cb) {
+    var queryString = "INSERT INTO burgers (burger_name) VALUES (??)";
+    connection.query(queryString, [burgerName.toString()], function(err,res) {
+        if (err) throw err;
+        cb(res);
 
-module.exports = ORM;
+    });
+}
+// insertOne();
+
+// updateOne();
+
+};
+
+
+
+module.exports = orm;
