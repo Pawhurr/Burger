@@ -11,24 +11,33 @@
         <div class="col-4 p-3 text-right">
             <img src="/assets/img/burger_to_eat.png" style="width: 100%">
             {{#each burgs}}
-            <p><strong>{{id}}.  {{burger_name}}</strong>
-                <button type="submit" class="btn btn-warning"><strong>Eat</strong></button>
+            {{#unless devoured}}
+            <p><strong>{{id}}. {{burger_name}}</strong>
+                <button type="submit" class="btn btn-warning change-eaten" data-id="{{id}}"
+                    data-eaten="{{devoured}}"><strong>Eat</strong></button>
             </p>
+            {{/unless}}
             {{/each}}
         </div>
         <div class="col-4 p-3">
             <img src="/assets/img/enter_the_burger.png" style="width: 100%">
-            <form>
+            <form class="create-form">
                 <div class="form-group mt-0">
                     <label for="createBurger"></label>
-                    <textarea class="form-control" id="createBurger" rows="3"></textarea>
+                    <textarea class="form-control"  style="font-weight: bold" id="createBurger" rows="3"></textarea>
                 </div>
-                  <button type="submit" class="btn btn-warning" id="makeBurger"><strong>Submit</strong></button>
+                <button type="submit" class="btn btn-warning" id="makeBurger"><strong>Submit</strong></button>
 
             </form>
         </div>
         <div class="col-4 p-3">
             <img src="/assets/img/the_burger_devoured.png" style="width: 100%">
+            {{#each burgs}}
+            {{#if devoured}}
+            <p><strike>{{id}}. {{burger_name}}</strike>
+            </p>
+            {{/if}}
+            {{/each}}
         </div>
 
     </div>
@@ -37,21 +46,42 @@
 </div>
 
 <script>
-      $("#makeBurger").on("click", function(event) {
-    event.preventDefault();
+    $(function () {
+        $(".change-eaten").on("click", function (event) {
+            var id = $(this).data("id");
+            var eaten = true;
 
-    var newBurger = {
-      name: $("#createBurger").val().trim()
-    };
+            var eatenState = {
+                devoured: true
+            };
 
-    $.ajax("/api/burgers", {
-      type: "POST",
-      data: newBurger
-    }).then(
-      function() {
-        console.log("created new burger");
-        location.reload();
-      }
-    );
-  });
+            $.ajax("/api/burgers/" + id, {
+                type: "PUT",
+                data: eatenState
+            }).then(
+                function () {
+                    console.log("changed state to", eatenState);
+                    location.reload();
+                }
+            );
+        });
+
+        $(".create-form").on("submit", function (event) {
+            event.preventDefault();
+
+            var newBurger = {
+                name: $("#createBurger").val().trim()
+            };
+
+            $.ajax("/api/burgers", {
+                type: "POST",
+                data: newBurger
+            }).then(
+                function () {
+                    console.log("created new burger");
+                    location.reload();
+                }
+            );
+        });
+    });
 </script>
